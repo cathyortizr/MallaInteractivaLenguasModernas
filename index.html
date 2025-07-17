@@ -2,194 +2,21 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Malla Curricular Interactiva</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .bop {
-      transition: transform 0.2s ease;
-    }
-    .bop:hover {
-      transform: scale(1.05);
-    }
-  </style>
+  <link rel="stylesheet" href="style.css"/>
+  <script defer src="script.js"></script>
 </head>
-<body class="bg-pink-50 min-h-screen p-6 font-sans">
-  <div class="max-w-6xl mx-auto">
-    <h1 class="text-4xl font-bold text-center text-pink-500 mb-6">🌸 Malla Curricular Interactiva</h1>
-
-    <div class="flex flex-wrap justify-between items-center mb-6 gap-2">
-      <input id="searchInput" type="text" placeholder="🔍 Buscar asignatura..." class="p-2 border rounded-md w-full sm:w-1/3">
-      <select id="semesterFilter" class="p-2 border rounded-md w-full sm:w-1/4">
-        <option value="all">Todos los semestres</option>
-        <option value="1">Semestre 1</option>
-        <option value="2">Semestre 2</option>
-        <option value="3">Semestre 3</option>
-        <option value="4">Semestre 4</option>
-      </select>
-      <select id="areaFilter" class="p-2 border rounded-md w-full sm:w-1/4">
-        <option value="all">Todas las áreas</option>
-        <option value="Programación">Programación</option>
-        <option value="Matemáticas">Matemáticas</option>
-        <option value="Idiomas">Idiomas</option>
-        <option value="Bases de Datos">Bases de Datos</option>
-      </select>
-      <div class="flex gap-2 mt-2 sm:mt-0 w-full sm:w-auto">
-        <button onclick="addSubject()" class="bg-pink-300 hover:bg-pink-400 text-white px-4 py-2 rounded-md bop w-full sm:w-auto">➕ Agregar asignatura</button>
-        <button onclick="exportToJSON()" class="bg-purple-200 hover:bg-purple-300 text-purple-800 px-4 py-2 rounded-md bop">📁 Exportar JSON</button>
-        <label class="cursor-pointer bg-blue-200 hover:bg-blue-300 text-blue-800 px-4 py-2 rounded-md bop">
-          📂 Cargar JSON
-          <input type="file" accept=".json" onchange="loadFromJSON(event)" class="hidden">
-        </label>
-        <button onclick="window.print()" class="bg-green-200 hover:bg-green-300 text-green-800 px-4 py-2 rounded-md bop">🖨️ Exportar PDF</button>
-      </div>
+<body>
+  <header>
+    <img src="logo.png" alt="Logo Universidad" class="logo"/>
+    <div>
+      <h1>Licenciatura en Lenguas Modernas</h1>
+      <div id="pga">PGA: <span id="pga-value">0.00</span></div>
+      <div id="progress">Materias aprobadas: <span id="completed-count">0</span> / <span id="total-count">0</span></div>
     </div>
-
-    <div id="grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      <!-- Las asignaturas se generan aquí -->
-    </div>
-  </div>
-
-  <script>
-    let subjects = JSON.parse(localStorage.getItem("mallaSubjects")) || [
-      { name: "Programación I", semester: "1", area: "Programación", status: "por dar", completed: false },
-      { name: "Matemáticas Discretas", semester: "1", area: "Matemáticas", status: "en curso", completed: false },
-      { name: "Inglés Técnico", semester: "2", area: "Idiomas", status: "completada", completed: true },
-      { name: "Base de Datos", semester: "2", area: "Bases de Datos", status: "por dar", prerequisite: "Programación I", completed: false },
-    ];
-
-    function saveToStorage() {
-      localStorage.setItem("mallaSubjects", JSON.stringify(subjects));
-    }
-
-    function exportToJSON() {
-      const blob = new Blob([JSON.stringify(subjects, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'malla_curricular.json';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function loadFromJSON(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = e => {
-        try {
-          subjects = JSON.parse(e.target.result);
-          saveToStorage();
-          renderSubjects();
-        } catch (error) {
-          alert("Error al cargar el archivo JSON");
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    function renderSubjects() {
-      const grid = document.getElementById("grid");
-      const semesterFilter = document.getElementById("semesterFilter").value;
-      const areaFilter = document.getElementById("areaFilter").value;
-      const search = document.getElementById("searchInput").value.toLowerCase();
-      grid.innerHTML = "";
-
-      subjects.forEach((subject, index) => {
-        const hasPrereq = subject.prerequisite;
-        const metPrereq = !hasPrereq || subjects.find(s => s.name === subject.prerequisite && s.completed);
-
-        if ((semesterFilter === "all" || subject.semester === semesterFilter) &&
-            (areaFilter === "all" || subject.area === areaFilter) &&
-            subject.name.toLowerCase().includes(search)) {
-
-          let statusColor = "border-gray-200";
-          if (subject.status === "por dar") statusColor = "border-yellow-300";
-          else if (subject.status === "en curso") statusColor = "border-blue-300";
-          else if (subject.status === "completada") statusColor = "border-green-300";
-
-          const locked = hasPrereq && !metPrereq;
-
-          const card = document.createElement("div");
-          card.className = `bop bg-white shadow-md rounded-2xl p-4 transition-all flex flex-col justify-between h-full border-4 ${locked ? 'opacity-50 border-gray-300' : statusColor}`;
-
-          card.innerHTML = `
-            <input class="text-xl font-semibold bg-transparent focus:outline-none" value="${subject.name}" ${locked ? 'disabled' : ''} onchange="editName(${index}, this.value)">
-            <div class="text-sm text-pink-500 mt-1">Semestre ${subject.semester} - Área: ${subject.area}</div>
-            ${subject.prerequisite ? `<div class="text-xs text-gray-500 mt-1">🔒 Requiere: ${subject.prerequisite}</div>` : ''}
-            <select onchange="changeStatus(${index}, this.value)" ${locked ? 'disabled' : ''} class="mt-2 text-sm p-1 rounded-md bg-pink-100">
-              <option value="por dar" ${subject.status === "por dar" ? "selected" : ""}>📌 Por dar</option>
-              <option value="en curso" ${subject.status === "en curso" ? "selected" : ""}>📖 En curso</option>
-              <option value="completada" ${subject.status === "completada" ? "selected" : ""}>✅ Completada</option>
-            </select>
-            <textarea class="w-full mt-2 p-2 text-sm bg-pink-100 rounded-md" placeholder="Notas..." ${locked ? 'disabled' : ''} onchange="saveNotes(${index}, this.value)">${subject.notes || ''}</textarea>
-            <div class="flex justify-between items-center mt-4">
-              <button onclick="toggleCompleted(${index})" ${locked ? 'disabled' : ''} class="text-sm px-3 py-1 rounded-full ${subject.completed ? 'bg-green-300 text-white' : 'bg-gray-200 text-gray-700'}">
-                ${subject.completed ? '✅ Completado' : 'Marcar como hecho'}
-              </button>
-              <button onclick="removeSubject(${index})" class="text-sm text-red-400 hover:text-red-600">🗑️</button>
-            </div>
-          `;
-
-          grid.appendChild(card);
-        }
-      });
-    }
-
-    function editName(index, newName) {
-      subjects[index].name = newName;
-      saveToStorage();
-      renderSubjects();
-    }
-
-    function changeStatus(index, newStatus) {
-      subjects[index].status = newStatus;
-      if (newStatus === "completada") {
-        subjects[index].completed = true;
-      }
-      saveToStorage();
-      renderSubjects();
-    }
-
-    function toggleCompleted(index) {
-      subjects[index].completed = !subjects[index].completed;
-      if (subjects[index].completed) {
-        subjects[index].status = "completada";
-      }
-      saveToStorage();
-      renderSubjects();
-    }
-
-    function saveNotes(index, note) {
-      subjects[index].notes = note;
-      saveToStorage();
-    }
-
-    function removeSubject(index) {
-      if (confirm("¿Estás segura de eliminar esta asignatura?")) {
-        subjects.splice(index, 1);
-        saveToStorage();
-        renderSubjects();
-      }
-    }
-
-    function addSubject() {
-      const name = prompt("Nombre de la asignatura:");
-      if (!name) return;
-      const semester = prompt("¿De qué semestre es?");
-      const area = prompt("¿Área o categoría? Ej: Programación, Matemáticas...");
-      const prerequisite = prompt("¿Requiere alguna asignatura previa? Si no, deja en blanco:");
-      subjects.push({ name, semester, area, prerequisite: prerequisite || null, status: "por dar", completed: false });
-      saveToStorage();
-      renderSubjects();
-    }
-
-    document.getElementById("searchInput").addEventListener("input", renderSubjects);
-    document.getElementById("semesterFilter").addEventListener("change", renderSubjects);
-    document.getElementById("areaFilter").addEventListener("change", renderSubjects);
-
-    renderSubjects();
-  </script>
+    <input type="text" id="searchBox" placeholder="🔍 Buscar asignatura..." />
+  </header>
+  <main id="malla-container"></main>
 </body>
 </html>
