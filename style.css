@@ -1,0 +1,113 @@
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #fefefe;
+  color: #444;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #faf6f0;
+  padding: 1rem;
+  border-bottom: 2px solid #eee;
+  flex-wrap: wrap;
+}
+
+.logo {
+  height: 60px;
+  margin-right: 1rem;
+}
+
+#searchBox {
+  padding: 8px;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  margin-top: 0.5rem;
+}
+
+main {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+
+.semestre {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+  padding: 1rem;
+  transition: transform 0.2s ease;
+}
+
+.semestre:hover {
+  transform: scale(1.01);
+}
+
+.semestre h2 {
+  font-size: 1.1rem;
+  color: #444;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.materia {
+  background: #f0f4f8;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.3s;
+}
+
+.materia.completada {
+  background: #d7f0d7;
+}
+
+.materia.en-curso {
+  background: #fff3cd;
+}
+
+.materia.bloqueada {
+  background: #f0f0f0;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.materia .editar {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+}
+
+.materia .editar:hover {
+  color: #333;
+}
+
+.tooltip {
+  position: absolute;
+  background: #333;
+  color: #fff;
+  padding: 6px;
+  font-size: 0.75rem;
+  border-radius: 5px;
+  top: 100%;
+  left: 0;
+  margin-top: 5px;
+  display: none;
+  z-index: 10;
+}
+
+.materia.bloqueada:hover .tooltip {
+  display: block;
+}
